@@ -1,0 +1,7 @@
+use { event } from types
+
+resource events {
+	static new: function() -> events
+	listen: function(name: string) -> events
+	exec: function(duration: u64) -> unit
+}

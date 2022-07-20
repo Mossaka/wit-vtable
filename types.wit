@@ -1,0 +1,4 @@
+record event {
+	id: string,
+	data: string
+}
