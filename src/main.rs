@@ -6,7 +6,7 @@ use std::{
 
 use anyhow::Result;
 // use event_handler::{EventHandler, EventHandlerData};
-use events::EventsTables;
+
 use wasi_cap_std_sync::WasiCtxBuilder;
 use wasi_common::{StringArrayError, WasiCtx};
 use wasmtime::{Config, Engine, Instance, Linker, Module, Store};
@@ -42,12 +42,12 @@ impl events::Events for Exec {
     type Events = ();
 
     fn events_new(&mut self) -> Self::Events {
-        ()
+        
     }
 
     fn events_listen(&mut self, _self_: &Self::Events, id: &str) -> Self::Events {
         self.vtable.push(id.to_string());
-        ()
+        
     }
 
     fn events_exec(&mut self, _self_: &Self::Events, _duration: u64) -> Self::Events {
@@ -77,7 +77,7 @@ impl events::Events for Exec {
         for handle in thread_handles {
             handle.join().unwrap();
         }
-        ()
+        
     }
 }
 
@@ -124,15 +124,15 @@ impl events::Events for GuestExec {
     type Events = ();
 
     fn events_new(&mut self) -> Self::Events {
-        ()
+        
     }
 
-    fn events_listen(&mut self, _self_: &Self::Events, id: &str) -> Self::Events {
-        ()
+    fn events_listen(&mut self, _self_: &Self::Events, _id: &str) -> Self::Events {
+        
     }
 
     fn events_exec(&mut self, _self_: &Self::Events, _duration: u64) -> Self::Events {
-        ()
+        
     }
 }
 
@@ -141,7 +141,7 @@ fn main() -> Result<()> {
     let path = "target/wasm32-wasi/debug/guest.wasm";
 
     let (mut store, _linker, instance) = wasmtime_init(&engine, path)?;
-    let (mut store2, _linker2, instance2) = wasmtime_init(&engine, path)?;
+    let (store2, _linker2, instance2) = wasmtime_init(&engine, path)?;
 
     store.data_mut().host = Exec {
         guest_instance: Some(Arc::new(Mutex::new(instance2))),
@@ -217,6 +217,6 @@ where
 pub type GuestContext = Context<GuestExec>;
 
 fn func_name_to_abi_name(name: &str) -> String {
-    let n = name.replace("_", "-");
+    let n = name.replace('_', "-");
     format!("handle-{}", n)
 }

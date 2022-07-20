@@ -12,7 +12,7 @@ fn some_kind_of_uppercase_first_letter(s: &str) -> String {
 }
 
 fn underscore_to_hyphen(s: &str) -> String {
-    s.replace("_", "-")
+    s.replace('_', "-")
 }
 
 /// Register handler
@@ -20,9 +20,9 @@ fn underscore_to_hyphen(s: &str) -> String {
 pub fn register_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let func = syn::parse_macro_input!(item as syn::ItemFn);
     let func_name = &func.sig.ident;
-    let handle_func = format!("handle_{}", func_name.to_string());
+    let handle_func = format!("handle_{}", func_name);
     let handle_func_wit = underscore_to_hyphen(&handle_func);
-    let mut event = r#"
+    let event = r#"
 record event {
     id: string,
     data: string,
@@ -32,7 +32,7 @@ record event {
     .to_string();
     let handle_func_wit =
         event + format!("{}: function(ev: event) -> unit\n        ", handle_func_wit).as_str();
-    let mut iface =
+    let iface =
         Interface::parse(&func_name.to_string(), &handle_func_wit).expect("parse error");
     let handle_func = syn::parse_str::<syn::Ident>(&handle_func).expect("parse error");
     let mut files = Files::default();
@@ -46,9 +46,9 @@ record event {
     let iface = syn::parse_macro_input!(iface_tokens as syn::ItemMod);
     let struct_name = func_name
         .to_string()
-        .split("_")
+        .split('_')
         .into_iter()
-        .map(|s| some_kind_of_uppercase_first_letter(s))
+        .map(some_kind_of_uppercase_first_letter)
         .collect::<String>();
     let struct_ident = syn::parse_str::<syn::Ident>(&struct_name).unwrap();
     quote!(
