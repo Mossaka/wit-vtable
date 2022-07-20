@@ -31,8 +31,7 @@ fn handle_event2(ev: handle_event2::Event) {
 fn main() -> Result<()> {
     let router = Router::builder()
         .get("/", "home_handler")
-        .get("/users/:userId", "
-        ")
+        .get("/users/:userId", "user_handler")
         .build()?
     let service = Service::new(router)?;
     Server::bind("localhost:3000").serve(service);
