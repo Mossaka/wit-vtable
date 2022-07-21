@@ -5,31 +5,14 @@ use std::{
 };
 
 use anyhow::Result;
-// use event_handler::{EventHandler, EventHandlerData};
-
+use handler::Event;
 use wasi_cap_std_sync::WasiCtxBuilder;
 use wasi_common::{StringArrayError, WasiCtx};
 use wasmtime::{Config, Engine, Instance, Linker, Module, Store};
 use wasmtime_wasi::*;
 use wit_bindgen_wasmtime::rt::RawMem;
-
-// wit_bindgen_wasmtime::import!("event-handler.wit");
+wit_bindgen_wasmtime::import!("handler.wit");
 wit_bindgen_wasmtime::export!("events.wit");
-
-// FIXME: maybe Event could be generated from the bindings file?
-#[derive(Clone)]
-pub struct Event<'a> {
-    pub id: &'a str,
-    pub data: &'a str,
-}
-impl<'a> std::fmt::Debug for Event<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Event")
-            .field("id", &self.id)
-            .field("data", &self.data)
-            .finish()
-    }
-}
 
 #[derive(Default)]
 pub struct Exec {
@@ -41,16 +24,13 @@ pub struct Exec {
 impl events::Events for Exec {
     type Events = ();
 
-    fn events_new(&mut self) -> Self::Events {
-        
-    }
+    fn events_new(&mut self) -> Self::Events {}
 
     fn events_listen(&mut self, _self_: &Self::Events, id: &str) -> Self::Events {
         self.vtable.push(id.to_string());
-        
     }
 
-    fn events_exec(&mut self, _self_: &Self::Events, _duration: u64) -> Self::Events {
+    fn events_exec(&mut self, self_: &Self::Events, _duration: u64) -> Self::Events {
         let mut thread_handles = vec![];
         for i in 1..4 {
             let store = self.guest_store.as_mut().unwrap().clone();
@@ -65,75 +45,41 @@ impl events::Events for Exec {
                         id: &format!("call-{}-{}", func_name, i),
                         data: "data",
                     };
-                    call_handle(
-                        &func_name_to_abi_name(func_name),
+                    let mut handler = handler::Handler::new(
                         store.deref_mut(),
                         instance.deref(),
-                        ev,
-                    );
+                        |ctx: &mut GuestContext| &mut ctx.host.data,
+                    )
+                    .unwrap();
+                    handler.handler = instance
+                        .get_typed_func::<(i32, i32, i32, i32), (), _>(
+                            store.deref_mut(),
+                            &func_name_to_abi_name(func_name),
+                        )
+                        .unwrap();
+                    handler.handler(store.deref_mut(), ev);
                 }
             }));
         }
         for handle in thread_handles {
             handle.join().unwrap();
         }
-        
     }
-}
-
-fn call_handle(
-    name: &str,
-    mut store: impl wasmtime::AsContextMut<Data = GuestContext>,
-    instance: &wasmtime::Instance,
-    ev: Event<'_>,
-) -> Result<()> {
-    let mut store = store.as_context_mut();
-    let canonical_abi_realloc = instance
-        .get_typed_func::<(i32, i32, i32, i32), i32, _>(&mut store, "canonical_abi_realloc")?;
-    let handler = instance.get_typed_func::<(i32, i32, i32, i32), (), _>(&mut store, name)?;
-    let memory = instance
-        .get_memory(&mut store, "memory")
-        .ok_or_else(|| anyhow::anyhow!("`memory` export not a memory"))?;
-    let Event {
-        id: id0,
-        data: data0,
-    } = ev;
-    let vec1 = id0;
-    let ptr1 = canonical_abi_realloc.call(&mut store, (0, 0, 1, vec1.len() as i32))?;
-    memory
-        .data_mut(&mut store)
-        .store_many(ptr1, vec1.as_bytes())?;
-    let vec2 = data0;
-    let ptr2 = canonical_abi_realloc.call(&mut store, (0, 0, 1, vec2.len() as i32))?;
-    memory
-        .data_mut(&mut store)
-        .store_many(ptr2, vec2.as_bytes())?;
-    handler.call(
-        &mut store,
-        (ptr1, vec1.len() as i32, ptr2, vec2.len() as i32),
-    )?;
-    Ok(())
 }
 
 #[derive(Default)]
 pub struct GuestExec {
-    // data: EventHandlerData,
+    data: handler::HandlerData,
 }
 
 impl events::Events for GuestExec {
     type Events = ();
 
-    fn events_new(&mut self) -> Self::Events {
-        
-    }
+    fn events_new(&mut self) -> Self::Events {}
 
-    fn events_listen(&mut self, _self_: &Self::Events, _id: &str) -> Self::Events {
-        
-    }
+    fn events_listen(&mut self, _self_: &Self::Events, _id: &str) -> Self::Events {}
 
-    fn events_exec(&mut self, _self_: &Self::Events, _duration: u64) -> Self::Events {
-        
-    }
+    fn events_exec(&mut self, _self_: &Self::Events, _duration: u64) -> Self::Events {}
 }
 
 fn main() -> Result<()> {
@@ -217,6 +163,5 @@ where
 pub type GuestContext = Context<GuestExec>;
 
 fn func_name_to_abi_name(name: &str) -> String {
-    let n = name.replace('_', "-");
-    format!("handle-{}", n)
+    name.replace('_', "-")
 }

@@ -1,5 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
+use syn::DeriveInput;
 use wit_bindgen_gen_core::{wit_parser::Interface, Direction, Files, Generator};
 use wit_bindgen_gen_rust_wasm::RustWasm;
 
@@ -20,7 +21,7 @@ fn underscore_to_hyphen(s: &str) -> String {
 pub fn register_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let func = syn::parse_macro_input!(item as syn::ItemFn);
     let func_name = &func.sig.ident;
-    let handle_func = format!("handle_{}", func_name);
+    let handle_func = format!("{}", func_name);
     let handle_func_wit = underscore_to_hyphen(&handle_func);
     let event = r#"
 record event {
@@ -32,8 +33,7 @@ record event {
     .to_string();
     let handle_func_wit =
         event + format!("{}: function(ev: event) -> unit\n        ", handle_func_wit).as_str();
-    let iface =
-        Interface::parse(&func_name.to_string(), &handle_func_wit).expect("parse error");
+    let iface = Interface::parse(&func_name.to_string(), &handle_func_wit).expect("parse error");
     let handle_func = syn::parse_str::<syn::Ident>(&handle_func).expect("parse error");
     let mut files = Files::default();
     let mut rust_wasm = RustWasm::new();

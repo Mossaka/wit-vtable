@@ -15,6 +15,12 @@ fn main() -> Result<()> {
 }
 
 #[register_handler]
+fn handler(ev: handler::Event) {
+    // dummy, not used
+    ()
+}
+
+#[register_handler]
 fn handle_event1(ev: handle_event1::Event) {
     println!("handle_event1 {}", ev.id);
 }

@@ -14,7 +14,12 @@ wasmtime = "0.35"
 wasmtime-wasi = "0.35"
 wasi-common = "0.35"
 wasi-cap-std-sync = "0.35"
-wit-bindgen-wasmtime = { git = "https://github.com/bytecodealliance/wit-bindgen", rev = "a79a4be33d76ddf62839ba71602c26a96610ef7c" }
+wit-bindgen-wasmtime = { git = "https://github.com/Mossaka/wit-bindgen", rev = "8252b0e39c7495f647ec0b0898721a7c641fc6c8" }
+# wit-bindgen-gen-wasmtime = { git = "https://github.com/bytecodealliance/wit-bindgen", rev = "a79a4be33d76ddf62839ba71602c26a96610ef7c" }
+# wit-bindgen-gen-core = { git = "https://github.com/bytecodealliance/wit-bindgen", rev = "a79a4be33d76ddf62839ba71602c26a96610ef7c" }
+# wit-bindgen-rust = { git = "https://github.com/bytecodealliance/wit-bindgen", rev = "a79a4be33d76ddf62839ba71602c26a96610ef7c" }
+# pmacro = { path = "macro" }
+
 
 [workspace]
 members = ["guest", "macro", "sdk"]
