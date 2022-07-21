@@ -10,7 +10,6 @@ use wasi_cap_std_sync::WasiCtxBuilder;
 use wasi_common::{StringArrayError, WasiCtx};
 use wasmtime::{Config, Engine, Instance, Linker, Module, Store};
 use wasmtime_wasi::*;
-use wit_bindgen_wasmtime::rt::RawMem;
 wit_bindgen_wasmtime::import!("handler.wit");
 wit_bindgen_wasmtime::export!("events.wit");
 

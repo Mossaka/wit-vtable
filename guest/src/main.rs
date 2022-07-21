@@ -14,6 +14,10 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+/// The guest has to register a dummy function, in which the name matches
+/// the name of the function defined in the WIT file. This is because the
+/// host will, by default, instantiate a struct that tries to get this function
+/// from the WIT file.
 #[register_handler]
 fn handler(ev: handler::Event) {
     // dummy, not used
