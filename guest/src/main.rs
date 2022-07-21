@@ -19,9 +19,9 @@ fn main() -> Result<()> {
 /// host will, by default, instantiate a struct that tries to get this function
 /// from the WIT file.
 #[register_handler]
-fn handler(ev: handler::Event) {
+fn handler(_ev: handler::Event) {
     // dummy, not used
-    ()
+    
 }
 
 #[register_handler]

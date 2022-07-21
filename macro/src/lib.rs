@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::DeriveInput;
+
 use wit_bindgen_gen_core::{wit_parser::Interface, Direction, Files, Generator};
 use wit_bindgen_gen_rust_wasm::RustWasm;
 

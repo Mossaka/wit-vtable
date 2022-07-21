@@ -29,7 +29,7 @@ impl events::Events for Exec {
         self.vtable.push(id.to_string());
     }
 
-    fn events_exec(&mut self, self_: &Self::Events, _duration: u64) -> Self::Events {
+    fn events_exec(&mut self, _self_: &Self::Events, _duration: u64) -> Self::Events {
         let mut thread_handles = vec![];
         for i in 1..4 {
             let store = self.guest_store.as_mut().unwrap().clone();
@@ -50,13 +50,26 @@ impl events::Events for Exec {
                         |ctx: &mut GuestContext| &mut ctx.host.data,
                     )
                     .unwrap();
+                    // FIXME: To modify handler, I modified the upstream wit-bindgen to
+                    // expose functions to public.
+                    //
+                    // The branch of my change is:
+                    // git = "https://github.com/Mossaka/wit-bindgen",
+                    // rev = "8252b0e39c7495f647ec0b0898721a7c641fc6c8"
+                    //
                     handler.handler = instance
                         .get_typed_func::<(i32, i32, i32, i32), (), _>(
                             store.deref_mut(),
                             &func_name_to_abi_name(func_name),
                         )
                         .unwrap();
-                    handler.handler(store.deref_mut(), ev);
+                    match handler.handler(store.deref_mut(), ev) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("{}", e);
+                            panic!("{}", e);
+                        }
+                    }
                 }
             }));
         }
