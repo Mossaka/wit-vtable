@@ -18,6 +18,9 @@ fn main() -> Result<()> {
 /// the name of the function defined in the WIT file. This is because the
 /// host will, by default, instantiate a struct that tries to get this function
 /// from the WIT file.
+///
+/// FIXME: One solution is to add another macro and register `main` function to
+/// automatically implement this dummy function.
 #[register_handler]
 fn handler(_ev: Event) {
     // dummy, not used
