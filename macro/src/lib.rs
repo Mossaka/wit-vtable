@@ -20,6 +20,9 @@ fn underscore_to_hyphen(s: &str) -> String {
 #[proc_macro_attribute]
 pub fn register_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let func = syn::parse_macro_input!(item as syn::ItemFn);
+    let func_body = func.block.clone();
+    let func_sig = func.sig.clone();
+    let func_parameter = func_sig.inputs.clone();
     let func_name = &func.sig.ident;
     let handle_func = format!("{}", func_name);
     let handle_func_wit = underscore_to_hyphen(&handle_func);
@@ -57,7 +60,9 @@ record event {
         struct #struct_ident {}
         impl #func_name::#struct_ident for #struct_ident {
             fn #handle_func(ev: #func_name::Event) {
-                #func
+                fn #func_name(ev: #func_name::Event) {
+                    #func_body
+                }
 
                 #func_name(ev)
             }

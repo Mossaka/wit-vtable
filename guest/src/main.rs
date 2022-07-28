@@ -19,22 +19,21 @@ fn main() -> Result<()> {
 /// host will, by default, instantiate a struct that tries to get this function
 /// from the WIT file.
 #[register_handler]
-fn handler(_ev: handler::Event) {
+fn handler(_ev: Event) {
     // dummy, not used
-    
 }
 
 #[register_handler]
-fn handle_event1(ev: handle_event1::Event) {
+fn handle_event1(ev: Event) {
     println!("handle_event1 {}", ev.id);
 }
 
 #[register_handler]
-fn handle_event2(ev: handle_event2::Event) {
+fn handle_event2(ev: Event) {
     println!("handle_event2 {}", ev.id);
 }
 
 #[register_handler]
-fn handle_event3(ev: handle_event3::Event) {
+fn handle_event3(ev: Event) {
     println!("handle_event3 {}", ev.id);
 }
