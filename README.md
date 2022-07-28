@@ -13,12 +13,12 @@ fn main() -> Result<()> {
 }
 
 #[register_handler]
-fn handle_event1(ev: handle_event1::Event) {
+fn handle_event1(ev: Event) {
     println!("handle_event1 {}", ev.id);
 }
 
 #[register_handler]
-fn handle_event2(ev: handle_event2::Event) {
+fn handle_event2(ev: Event) {
     println!("handle_event2 {}", ev.id);
 }
 
